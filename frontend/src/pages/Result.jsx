@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-    ArrowLeft, Heart, Activity, Flame, Droplet, Leaf, AlertTriangle
+    ArrowLeft, Heart, CheckCircle2, XCircle, Info
 } from 'lucide-react';
 import HealthScore from '../components/HealthScore';
 import IngredientCard from '../components/IngredientCard';
@@ -11,7 +11,7 @@ const Result = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Protect route if accessed without state
+    // Protecting route if accessed without state
     if (!location.state || !location.state.result) {
         return <Navigate to="/" replace />;
     }
@@ -87,41 +87,61 @@ const Result = () => {
 
                         <div>
                             <h3 className="text-lg font-semibold text-gray-300 flex items-center gap-2 mb-4 border-b border-surface-border pb-2">
-                                <Activity size={20} className="text-primary" />
-                                Nutritional Breakdown
+                                <Info size={20} className="text-primary" />
+                                Detailed AI Dietary Analysis
                             </h3>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                <NutritionItem
-                                    icon={<Flame size={24} className="text-red-400" />}
-                                    value={result.nutrition.calories}
-                                    label="Calories"
-                                    delay={0}
-                                />
-                                <NutritionItem
-                                    icon={<Droplet size={24} className="text-amber-400" />}
-                                    value={result.nutrition.sugar}
-                                    label="Sugar"
-                                    delay={1}
-                                />
-                                <NutritionItem
-                                    icon={<Activity size={24} className="text-purple-400" />}
-                                    value={result.nutrition.fat}
-                                    label="Fat"
-                                    delay={2}
-                                />
-                                <NutritionItem
-                                    icon={<Leaf size={24} className="text-emerald-400" />}
-                                    value={result.nutrition.protein}
-                                    label="Protein"
-                                    delay={3}
-                                />
-                                <NutritionItem
-                                    icon={<AlertTriangle size={24} className="text-orange-400" />}
-                                    value={result.nutrition.sodium}
-                                    label="Sodium"
-                                    delay={4}
-                                />
+                            <div className="space-y-4 text-gray-300 text-base leading-relaxed">
+                                {/* Overall Summary */}
+                                <motion.div
+                                    className="bg-black/20 p-5 rounded-2xl border border-surface-border shadow-md"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.4 }}
+                                >
+                                    <p className="font-medium text-gray-100 mb-2">Verdict</p>
+                                    <p>{result.analysis}</p>
+                                </motion.div>
+
+                                {/* Dietary Guidance Grid */}
+                                {result.detailedAnalysis && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <motion.div
+                                            className="bg-emerald-500/5 border border-emerald-500/20 p-5 rounded-2xl"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.5 }}
+                                        >
+                                            <p className="flex items-center gap-2 text-emerald-400 font-semibold mb-2">
+                                                <CheckCircle2 size={18} /> Best For
+                                            </p>
+                                            <p className="text-sm">{result.detailedAnalysis.whoShouldEat || "Not specifically indicated."}</p>
+                                        </motion.div>
+
+                                        <motion.div
+                                            className="bg-red-500/5 border border-red-500/20 p-5 rounded-2xl"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.6 }}
+                                        >
+                                            <p className="flex items-center gap-2 text-red-400 font-semibold mb-2">
+                                                <XCircle size={18} /> Who Should Avoid
+                                            </p>
+                                            <p className="text-sm">{result.detailedAnalysis.whoShouldAvoid || "No specific groups indicated."}</p>
+                                        </motion.div>
+
+                                        {/* Good/Bad rationale spans 2 cols on wide mode */}
+                                        <motion.div
+                                            className="bg-primary/5 border border-primary/20 p-5 rounded-2xl sm:col-span-2"
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.7 }}
+                                        >
+                                            <p className="font-semibold text-primary mb-2">Extensive Rationale</p>
+                                            <p className="text-sm">{result.detailedAnalysis.whyGoodOrBad || "Unable to generate detailed rationale."}</p>
+                                        </motion.div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -130,20 +150,5 @@ const Result = () => {
         </motion.div>
     );
 };
-
-/* Helper component for nutrition grid */
-const NutritionItem = ({ icon, value, label, delay }) => (
-    <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5 + (delay * 0.1), type: 'spring' }}
-        whileHover={{ y: -5, scale: 1.05 }}
-        className="bg-black/20 border border-surface-border rounded-2xl p-4 flex flex-col items-center gap-2 shadow-lg backdrop-blur-md transition-all cursor-default hover:bg-black/40 hover:border-surface-border/80"
-    >
-        <div className="drop-shadow-[0_0_8px_currentColor] opacity-90">{icon}</div>
-        <span className="text-xl font-bold text-white tracking-wide">{value}</span>
-        <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">{label}</span>
-    </motion.div>
-);
 
 export default Result;
